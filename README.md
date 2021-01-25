@@ -1,4 +1,4 @@
-# ¡File Fiesta!
+# File Fiesta
 
 ---
 

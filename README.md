@@ -36,12 +36,12 @@ $ filefiesta
 
 File Fiesta currently supports three command line flags, as follows:
 
-**-dir:** Allows the user to specify the directory to search, using absolute or relative paths. Note that if the path name has spaces in it, the path must be surrounded by doubel quotes ("").
+**-dir:** Allows the user to specify the directory to search, using absolute or relative paths. Note that if the path name has spaces in it, the path must be surrounded by doubel quotes (""). Director names are not case sensitive.
 
 **Default Value:** "./"
 
 ```
--dir="...File Directory..."
+-dir="/c/Users/user1/Downloads"
 ```
 
 **-numFiles:** Specifies the number of files to return from the function. Must be greater than 0.

@@ -2,13 +2,13 @@ package main
 
 //File Fiesta takes a directory (dir) and number (numFiles) input from the user
 //It runs a recursive depth first search (using filepath.Walk) through all underlying files and folders in the Dir
-//Return a sorted list of the largest N files, with file name, location, & size
+//Return a sorted list of the numFiles largest files, with file name, location, & size
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"golang.org/x/text/message"
 )
@@ -19,10 +19,20 @@ type file struct {
 	size     int64
 }
 
+type files struct {
+	list []file
+}
+
 func main() {
-	//get directory & number of files to return from command line flags
-	dir := flag.String("dir", "./", "Directory to search")
-	numFiles := flag.Int("numFiles", 20, "Number of files to return")
+	timer := time.Now()
+	var dir string
+	var numFiles int
+	var scanHidden bool
+
+	//get directory, number of files to return, and whether to skip hidden directories from command line flags
+	flag.StringVar(&dir, "dir", "./", "Directory to search?")
+	flag.IntVar(&numFiles, "numFiles", 20, "Number of files to return?")
+	flag.BoolVar(&scanHidden, "hidden", false, "Scan hidden directories? (default false")
 	flag.Parse()
 
 	//create a new printer that formats numbers using 000s commas
@@ -32,20 +42,21 @@ func main() {
 	p.Println("\n---------------------------------File Fiesta---------------------------------")
 
 	//call the fileSearch function and save the result
-	results, fileCount, skippedDirs, dirSize, err := fileSearch(*dir, *numFiles)
+	results, fileCount, skippedDirs, dirSize, err := fileSearch(scanHidden, dir, numFiles)
 	if err != nil {
-		panic(err)
+		p.Println("There was an error while walking the directory:")
+		p.Println(err)
+		p.Println("File paths that includes spaces should be surrounded by double quotes(\"\")")
+		os.Exit(1)
 	}
 
 	//print the results to the terminal
-	p.Println("The subject directory is", dirSize/1000000, "mb, including any hidden directories.")
-	p.Println("\n\nTotal files searched:\t", fileCount)
+	p.Printf("The subject directory is %.2f MB, including any hidden directories.\n", float64(dirSize)/1048576)
+	p.Println("\n\nTotal files searched:\t\t", fileCount)
 	p.Println("Hidden directories skipped:\t", skippedDirs)
-	if fileCount < *numFiles {
-		p.Println("\nReturned the largest", fileCount, "files:")
-	} else {
-		p.Println("\nReturned the largest", *numFiles, "files:")
-	}
+	p.Println("\nReturned the largest", min([]int{fileCount, numFiles, len(results)}), "files:")
+
+	var topSize int64
 	for i, s := range results {
 		if s.name == "." {
 			continue
@@ -53,15 +64,18 @@ func main() {
 		p.Println(i+1, "------------------------------------------------")
 		p.Println("Name:\t\t", s.name)
 		p.Println("Location:\t", s.location)
-		p.Println("Size\t\t", s.size/1000000, "mb\n")
+		p.Printf("Size\t\t %.2f MB\n", float64(s.size)/1048576)
+		topSize += s.size
 	}
-
+	p.Println("-------------------------------Search Completed------------------------------")
+	p.Println("Your search was completed in", time.Since(timer))
+	p.Printf("\nThe top %d results total %.2f MB\n", min([]int{fileCount, numFiles, len(results)}), float64(topSize)/1048576)
 }
 
-func fileSearch(dir string, numFiles int) ([]file, int, int, int64, error) {
+func fileSearch(scanHidden bool, dir string, numFiles int) ([]file, int, int, int64, error) {
 	var dirSize int64
 	var smallest int64
-	// var smallIndex int
+
 	fileCount := 0
 	skippedDirs := 0
 	files := []file{}
@@ -73,7 +87,7 @@ func fileSearch(dir string, numFiles int) ([]file, int, int, int64, error) {
 		}
 
 		//skip hidden directories (if chosen in the flags)
-		if info.IsDir() && info.Name() != filepath.Base(dir) && info.Name()[0] == '.' {
+		if scanHidden == false && info.IsDir() && info.Name() != filepath.Base(dir) && info.Name()[0] == '.' {
 			skippedDirs++
 			dirSize += info.Size()
 			return filepath.SkipDir
@@ -81,9 +95,9 @@ func fileSearch(dir string, numFiles int) ([]file, int, int, int64, error) {
 
 		//only include the largest files (numFiles)
 		if !info.IsDir() {
-			if info.Size() > smallest && len(files) < numFiles {
-				files = append(files, file{name: info.Name(), location: path, size: info.Size()})
-			}
+			newFile := file{name: info.Name(), location: path, size: info.Size()}
+			files = sortSearch(newFile, files, &smallest, numFiles)
+
 		}
 
 		//count all all locations except the root path we are searching
@@ -97,9 +111,60 @@ func fileSearch(dir string, numFiles int) ([]file, int, int, int64, error) {
 		return nil
 	})
 	if err != nil {
-		fmt.Println("There was an error while walking the directory:", err)
 		return nil, fileCount, skippedDirs, dirSize, err
 	}
 
 	return files, fileCount, skippedDirs, dirSize, nil
+}
+
+func sortSearch(newFile file, files []file, smallest *int64, numFiles int) []file {
+
+	//if it's the first file, add it to our files slice
+	if len(files) == 0 {
+		files = append(files, newFile)
+		*smallest = newFile.size
+	} else {
+		//otherwise binary search through files slice
+		for i := 0; i < len(files); i++ {
+			//if newFile is smaller the files[i] continue loop
+			if files[i].size >= newFile.size {
+
+				if i == len(files)-1 { //if it's the last element, clean things up
+					if len(files) < numFiles {
+						files = append(files, newFile)
+					} else {
+						files = files[:numFiles]
+					}
+
+					*smallest = files[len(files)-1].size
+
+					break
+				}
+				continue
+			} else {
+				//insert newFile in the correct position
+				files = append(files[:i], append([]file{newFile}, files[i:]...)...)
+
+				if len(files) > numFiles {
+					files = files[:numFiles]
+				}
+
+				*smallest = files[len(files)-1].size
+
+				break
+			}
+		}
+	}
+
+	return files
+}
+
+func min(ints []int) int {
+	min := ints[0]
+	for _, v := range ints {
+		if v < min {
+			min = v
+		}
+	}
+	return min
 }

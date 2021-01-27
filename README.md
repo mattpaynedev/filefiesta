@@ -2,7 +2,7 @@
 
 ---
 
-File Fiesta is a small command line application that outputs the largest files within a given directory.
+File Fiesta is a small command line application written in Go that outputs the largest files within a given directory.
 
 ---
 
@@ -11,10 +11,54 @@ File Fiesta is useful for managing the limited capacity of online file storage/s
 
 
 ### Installation:
+File Fiesta can easily be installed from source. To install File Fiesta, you'll need to have an up to date version of Go installed on your machine. You can download Go [here](https://golang.org/).
 
+Once Go is installed, make a clone of this repository:
+
+```
+$ git clone https://github.com/mattpaynedev/filefiesta.git
+$ cd filefiesta
+```
+
+Install the binary to your machine:
+
+```
+$ go install
+```
+
+At this point, you should be able to run the program from any directory:
+
+```
+$ filefiesta
+```
 
 ### How to:
 
+File Fiesta currently supports three command line flags, as follows:
+
+**-dir:** Allows the user to specify the directory to search, using absolute or relative paths. Note that if the path name has spaces in it, the path must be surrounded by doubel quotes ("").
+
+**Default Value:** "./"
+
+```
+-dir="...File Directory..."
+```
+
+**-numFiles:** Specifies the number of files to return from the function. Must be greater than 0.
+
+**Default Value:** 20
+
+```
+-numFiles=10
+```
+
+**-hidden:** Specifies whether hidden folder (whose names begin with ".") will be included in the search. For example, by default ".git" folder would be excluded from the scan.
+
+**Default Value:** false
+
+```
+-hidden=true
+```
 
 ### Under the hood:
 The File Fiesta app takes user defined values via command line flags and outputs the largest files in the chosen directory, sorted from largest to smallest. By default the program searches the current directory and returns up to 20 of the largest files and ignores hidden folders (whose directory names begin with '.', for example `.git`)

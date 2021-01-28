@@ -52,7 +52,7 @@ File Fiesta currently supports three command line flags, as follows:
 -numFiles=10
 ```
 
-**-hidden:** Specifies whether hidden folders (whose names begin with ".") will be included in the search. For example, by default ".git" folder would be excluded from the scan.
+**-hidden:** Specifies whether hidden folders (whose names begin with ".") will be included in the search. For example, by default ".git" folders would be excluded from the scan.
 
 **Default Value:** false
 

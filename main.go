@@ -9,6 +9,7 @@ name, path, and size of the largest files.
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -33,6 +34,10 @@ func main() {
 	flag.IntVar(&numFiles, "numFiles", 20, "Number of files to return?")
 	flag.BoolVar(&scanHidden, "hidden", false, "Scan hidden directories? (default false")
 	flag.Parse()
+	if numFiles <= 0 {
+		fmt.Println("\n**The numFiles input must be a positive integer. Please try again.**")
+		os.Exit(1)
+	}
 
 	//create a new printer that formats numbers using 000s commas
 	p := message.NewPrinter(message.MatchLanguage("en"))

@@ -1,8 +1,11 @@
 package main
 
-//File Fiesta takes a directory (dir) and number (numFiles) input from the user
-//It runs a recursive depth first search (using filepath.Walk) through all underlying files and folders in the Dir
-//Return a sorted list of the numFiles largest files, with file name, location, & size
+/*
+File Fiesta returns a sorted list of largest files in a given folder.
+It takes a string (dir) and int (numFiles) and runs a recursive,
+depth first search (using filepath.Walk). It then returns the
+name, path, and size of the largest files.
+*/
 
 import (
 	"flag"
@@ -17,10 +20,6 @@ type file struct {
 	name     string
 	location string
 	size     int64
-}
-
-type files struct {
-	list []file
 }
 
 func main() {

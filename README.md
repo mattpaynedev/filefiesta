@@ -7,7 +7,7 @@ File Fiesta is a small command line application written in Go that outputs the l
 ---
 
 ### Background:
-File Fiesta is useful for managing the limited capacity of online file storage/sync service (Dropbox/Google Drive/Box/etc.). The program outputs the largest files in a given directory, along with their locations and size. When you are near capacity for your storage service, you can use File Fiesta to locate the largest files in your drive (videos, raw photos, etc.), no matter how complicated the folder structure and decide whether to delete them to free up space. Note that the program will only search through files that are synced with your machine, so it will not capture files that are only stored in the cloud.
+File Fiesta is useful for managing the limited capacity of online file storage/sync service (Dropbox/Google Drive/Box/etc.). The program outputs the largest files in a given directory, along with their locations and sizes. When you are near capacity for your storage service, you can use File Fiesta to locate the largest files in your drive (videos, raw photos, etc.), no matter how complicated the folder structure and decide whether to delete them to free up space. Note that the program will only search through files that are synced with your machine, so it will not capture files that are only stored in the cloud.
 
 
 ### Installation:

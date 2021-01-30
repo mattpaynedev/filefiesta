@@ -1,7 +1,7 @@
 package main
 
 /*
-File Fiesta returns a sorted list of largest files in a given folder.
+File Fiesta returns a sorted list of the largest files in a given folder.
 It takes a string (dir) and int (numFiles) and runs a recursive,
 depth first search (using filepath.Walk). It then returns the
 name, path, and size of the largest files.

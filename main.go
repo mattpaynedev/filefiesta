@@ -54,11 +54,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	filesReturned := findSmallest([]int{fileCount, numFiles, len(results)})
+
 	//print the results to the terminal
 	p.Printf("The subject directory is %.2f MB, including any hidden directories.\n", float64(dirSize)/1048576)
 	p.Println("\n\nTotal files searched:\t\t", fileCount)
 	p.Println("Hidden directories skipped:\t", skippedDirs)
-	p.Println("\nReturned the largest", min([]int{fileCount, numFiles, len(results)}), "files:")
+	p.Println("\nReturned the largest", filesReturned, "files:")
 
 	var topSize int64
 	for i, s := range results {
@@ -73,7 +75,7 @@ func main() {
 	}
 	p.Println("-------------------------------Search Completed------------------------------")
 	p.Println("Your search was completed in", time.Since(timer))
-	p.Printf("\nThe top %d results total %.2f MB\n", min([]int{fileCount, numFiles, len(results)}), float64(topSize)/1048576)
+	p.Printf("\nThe top %d results total %.2f MB\n", filesReturned, float64(topSize)/1048576)
 }
 
 func fileSearch(scanHidden bool, dir string, numFiles int) ([]file, int, int, int64, error) {
@@ -100,7 +102,7 @@ func fileSearch(scanHidden bool, dir string, numFiles int) ([]file, int, int, in
 		//only include the largest files (numFiles)
 		if !info.IsDir() {
 			newFile := file{name: info.Name(), location: path, size: info.Size()}
-			files = sortSearch(newFile, files, &smallest, numFiles)
+			files, smallest = sortSearch(newFile, files, smallest, numFiles)
 
 		}
 
@@ -121,12 +123,12 @@ func fileSearch(scanHidden bool, dir string, numFiles int) ([]file, int, int, in
 	return files, fileCount, skippedDirs, dirSize, nil
 }
 
-func sortSearch(newFile file, files []file, smallest *int64, numFiles int) []file {
+func sortSearch(newFile file, files []file, smallest int64, numFiles int) ([]file, int64) {
 
 	//if it's the first file, add it to our files slice
 	if len(files) == 0 {
 		files = append(files, newFile)
-		*smallest = newFile.size
+		smallest = newFile.size
 	} else {
 		//otherwise binary search through files slice
 		for i := 0; i < len(files); i++ {
@@ -140,7 +142,7 @@ func sortSearch(newFile file, files []file, smallest *int64, numFiles int) []fil
 						files = files[:numFiles]
 					}
 
-					*smallest = files[len(files)-1].size
+					smallest = files[len(files)-1].size
 
 					break
 				}
@@ -153,17 +155,17 @@ func sortSearch(newFile file, files []file, smallest *int64, numFiles int) []fil
 					files = files[:numFiles]
 				}
 
-				*smallest = files[len(files)-1].size
+				smallest = files[len(files)-1].size
 
 				break
 			}
 		}
 	}
 
-	return files
+	return files, smallest
 }
 
-func min(ints []int) int {
+func findSmallest(ints []int) int {
 	min := ints[0]
 	for _, v := range ints {
 		if v < min {

@@ -129,8 +129,8 @@ func sortSearch(newFile file, files []file, smallest int64, numFiles int) ([]fil
 	if len(files) == 0 {
 		files = append(files, newFile)
 		smallest = newFile.size
-	} else {
-		//otherwise binary search through files slice
+	} else if files[len(files)-1].size < newFile.size {
+		//otherwise linear search through files slice
 		for i := 0; i < len(files); i++ {
 			//if newFile is smaller the files[i] continue loop
 			if files[i].size >= newFile.size {
